@@ -1,0 +1,5 @@
+[package]
+
+name = "approvals"
+version = "0.0.1"
+authors = ["alekspak <alekspak@icloud.com>"]
