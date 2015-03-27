@@ -1,3 +1,61 @@
-#[test]
-fn it_works() {
+#![feature(plugin_registrar, rustc_private)]
+
+extern crate syntax;
+extern crate rustc;
+
+use syntax::codemap::Span;
+use syntax::parse::token;
+use syntax::ast::{TokenTree, TtToken};
+use syntax::ext::base::{ExtCtxt, MacResult, DummyResult, MacEager};
+use syntax::ext::build::AstBuilder;
+use rustc::plugin::Registry;
+
+fn expand_rn(cx: &mut ExtCtxt, sp: Span, args: &[TokenTree]) -> Box<MacResult + 'static> {
+    let filelines = cx.codemap().span_to_lines(cx.call_site());
+    println!("Lines: {:?}", filelines.lines);
+    println!("Debug: {:?}", filelines.file.get_line(filelines.lines[0]));
+
+    static NUMERALS: &'static [(&'static str, u32)] = &[
+        ("M", 1000), ("CM", 900), ("D", 500), ("CD", 400),
+        ("C",  100), ("XC",  90), ("L",  50), ("XL",  40),
+        ("X",   10), ("IX",   9), ("V",   5), ("IV",   4),
+        ("I",    1)];
+
+    let mut ident = None;
+    let text = match args {
+        [TtToken(_, token::Ident(s, _))] => {
+            ident = Some(s);
+            token::get_ident(ident.unwrap()).to_string()
+        },
+        _ => {
+            cx.span_err(sp, "argument should be a single identifier");
+            return DummyResult::any(sp);
+        }
+    };
+
+    let span = cx.call_site().clone();
+    let path = cx.mod_path.clone();
+    println!("Path: {:?}", cx.path_ident(span, ident.unwrap()));
+
+    let mut text = &*text;
+    let mut total = 0;
+    while !text.is_empty() {
+        match NUMERALS.iter().find(|&&(rn, _)| text.starts_with(rn)) {
+            Some(&(rn, val)) => {
+                total += val;
+                text = &text[rn.len()..];
+            }
+            None => {
+                cx.span_err(sp, "invalid Roman numeral");
+                return DummyResult::any(sp);
+            }
+        }
+    }
+
+    MacEager::expr(cx.expr_u32(sp, total))
+}
+
+#[plugin_registrar]
+pub fn plugin_registrar(reg: &mut Registry) {
+    reg.register_macro("rn", expand_rn);
 }
