@@ -22,10 +22,20 @@ fn expand_approve(_cx: &mut ExtCtxt, sp: Span, _args: &[TokenTree]) -> Box<MacRe
 macro_rules! approve_file {
     ($actual: ident, $file: ident) => {
         {
-            use std::fs::{File, TempDir};
+            use std::fs::{File, PathExt, TempDir, create_dir}; // FIXME: use tempdir when linking will not fail
             use std::io::{Read, Write};
             use std::path::Path;
             use std::process::Command;
+
+            let expected_dir = Path::new("expected");
+            if !expected_dir.exists() {
+                match create_dir(expected_dir) {
+                    Err(err) => panic!("Failed to create directory for expected data: {:?}", err),
+                    _ => {}
+                }
+            } else if !expected_dir.is_dir() {
+                panic!("Directory for expected data is not a directory")
+            }
 
             let expected_filename = format!("expected/{}.txt", stringify!($file));
             let expected_path = Path::new(&expected_filename);

@@ -1,4 +1,4 @@
-#![feature(plugin, tempdir)]
+#![feature(plugin, tempdir, path_ext)]
 #![plugin(approvals)]
 #[macro_use] extern crate approvals;
 
