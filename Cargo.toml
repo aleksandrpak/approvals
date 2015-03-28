@@ -10,7 +10,6 @@ documentation = "https://github.com/aleksandrpak/approvals"
 repository = "https://github.com/aleksandrpak/approvals"
 
 license = "The MIT License"
-license-file = "LICENSE"
 
 exclude = [
     "src/approvals_test/*",
