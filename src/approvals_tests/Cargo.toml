@@ -3,9 +3,5 @@ name = "approvals_tests"
 version = "0.0.1"
 authors = ["alekspak <alekspak@icloud.com>"]
 
-[lib]
-name = "approvals_tests"
-crate_type = [ "dylib" ]
-
 [dependencies.approvals]
 path = "../../"

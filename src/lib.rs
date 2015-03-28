@@ -13,20 +13,7 @@ pub fn plugin_registrar(reg: &mut Registry) {
     reg.register_macro("approve", expand_approve);
 }
 
-//fn get_method_name(_cx: &mut ExtCtxt) -> String {
-    //let filelines = cx.codemap().span_to_lines(cx.call_site());
-//    "test_123".to_string()
-//}
-
 fn expand_approve(_cx: &mut ExtCtxt, sp: Span, _args: &[TokenTree]) -> Box<MacResult + 'static> {
-    // let actual = match args {
-    //     [TtToken(_, token::Ident(s, _))] => token::get_ident(s).to_string(),
-    //     _ => {
-    //         cx.span_err(sp, "argument should be a single identifier");
-    //         return DummyResult::any(sp);
-    //     }
-    // };
-
     // FIXME: get method name and call approve_file
     DummyResult::any(sp)
 }
@@ -52,8 +39,11 @@ macro_rules! approve_file {
                 }
             };
 
-            let mut expected = String::new();
-            expected_file.read_to_string(&mut expected);
+            let mut expected = String::with_capacity($actual.len());
+            match expected_file.read_to_string(&mut expected) {
+                Err(err) => panic!("Failed to read expected data: {:?}", err),
+                _ => {}
+            }
 
             if $actual != expected {
                 let temp_dir = match TempDir::new("approvals") {
@@ -67,17 +57,22 @@ macro_rules! approve_file {
                     Err(err) => panic!("Failed to create temp file: {:?}", err)
                 };
 
-                actual_file.write_all($actual.as_bytes());
+                match actual_file.write_all($actual.as_bytes()) {
+                    Err(err) => panic!("Failed to write actual data for comparing: {:?}", err),
+                    _ => {}
+                }
 
-                let actual_os_path = actual_path.as_os_str();
-                let expected_os_path = expected_path.as_os_str();
-                let diff_tool = "opendiff";
+                let diff_tool = "opendiff"; // FIXME: Configure
 
-                let mut command1 = Command::new(diff_tool);
-                let command2 = command1.arg(actual_os_path);
-                let command3 = command2.arg(expected_os_path);
-                println!("Command: {:?}", command3);
-                command3.output();
+                let output = Command::new(diff_tool)
+                    .arg(actual_path.as_os_str())
+                    .arg(expected_path.as_os_str())
+                    .output();
+
+                match output {
+                    Err(err) => panic!("Failed to launch diff tool '{}': {:?}", diff_tool, err),
+                    _ => {}
+                }
 
                 panic!("strings are not equal")
             }

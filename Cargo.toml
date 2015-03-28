@@ -1,15 +1,15 @@
 [package]
 name = "approvals"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["alekspak <alekspak@icloud.com>"]
 
-description = "A simple library allowing to compare strings in unit-tests"
+description = "A simple library allowing to compare strings in unit-tests. Currently in development stage and not usable."
 
 homepage = "https://github.com/aleksandrpak/approvals"
 documentation = "https://github.com/aleksandrpak/approvals"
 repository = "https://github.com/aleksandrpak/approvals"
 
-license = "MIT License"
+license = "MIT"
 
 exclude = [
     "src/approvals_test/*",
@@ -19,4 +19,3 @@ exclude = [
 [lib]
 name = "approvals"
 crate_type = [ "dylib" ]
-
