@@ -1,6 +1,6 @@
 [package]
 name = "approvals"
-version = "0.0.2"
+version = "0.0.3"
 authors = ["alekspak <alekspak@icloud.com>"]
 
 description = "A simple library allowing to compare strings in unit-tests. Currently in development stage and not usable."
