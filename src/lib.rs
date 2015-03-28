@@ -4,8 +4,7 @@ extern crate syntax;
 extern crate rustc;
 
 use syntax::codemap::Span;
-use syntax::parse::token;
-use syntax::ast::{TokenTree, TtToken};
+use syntax::ast::TokenTree;
 use syntax::ext::base::{ExtCtxt, MacResult, DummyResult};
 use rustc::plugin::Registry;
 
@@ -14,19 +13,19 @@ pub fn plugin_registrar(reg: &mut Registry) {
     reg.register_macro("approve", expand_approve);
 }
 
-fn get_method_name(_cx: &mut ExtCtxt) -> String {
+//fn get_method_name(_cx: &mut ExtCtxt) -> String {
     //let filelines = cx.codemap().span_to_lines(cx.call_site());
-    "test_123".to_string()
-}
+//    "test_123".to_string()
+//}
 
-fn expand_approve(cx: &mut ExtCtxt, sp: Span, args: &[TokenTree]) -> Box<MacResult + 'static> {
-    let actual = match args {
-        [TtToken(_, token::Ident(s, _))] => token::get_ident(s).to_string(),
-        _ => {
-            cx.span_err(sp, "argument should be a single identifier");
-            return DummyResult::any(sp);
-        }
-    };
+fn expand_approve(_cx: &mut ExtCtxt, sp: Span, _args: &[TokenTree]) -> Box<MacResult + 'static> {
+    // let actual = match args {
+    //     [TtToken(_, token::Ident(s, _))] => token::get_ident(s).to_string(),
+    //     _ => {
+    //         cx.span_err(sp, "argument should be a single identifier");
+    //         return DummyResult::any(sp);
+    //     }
+    // };
 
     // FIXME: get method name and call approve_file
     DummyResult::any(sp)
