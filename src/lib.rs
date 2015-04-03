@@ -1,68 +1,64 @@
-#![feature(plugin_registrar, rustc_private)]
-
-extern crate syntax;
-extern crate rustc;
-
-use syntax::codemap::Span;
-use syntax::ast::TokenTree;
-use syntax::ext::base::{ExtCtxt, MacResult, DummyResult};
-use rustc::plugin::Registry;
-
-#[plugin_registrar]
-pub fn plugin_registrar(reg: &mut Registry) {
-    reg.register_macro("approve", expand_approve);
-}
-
-fn expand_approve(_cx: &mut ExtCtxt, sp: Span, _args: &[TokenTree]) -> Box<MacResult + 'static> {
-    // FIXME: get method name and call approve_file
-    DummyResult::any(sp)
-}
-
 #[macro_export]
-macro_rules! approve_file {
-    ($actual: ident, $file: ident) => {
+macro_rules! approve {
+    ($actual: ident) => {
         {
-            use std::fs::{File, PathExt, TempDir, create_dir}; // FIXME: use tempdir when linking will not fail
+            use std::fs;
+            use std::fs::{File, PathExt};
             use std::io::{Read, Write};
             use std::path::Path;
             use std::process::Command;
 
-            let expected_dir = Path::new("expected");
-            if !expected_dir.exists() {
-                match create_dir(expected_dir) {
-                    Err(err) => panic!("Failed to create directory for expected data: {:?}", err),
+            let mut backtrace = vec![];
+            ::std::rt::backtrace::write(&mut backtrace);
+            let s = String::from_utf8(backtrace).unwrap();
+
+            let method_name = s
+                .as_str()
+                .lines()
+                .skip(2)
+                .next()
+                .unwrap()
+                .split("-")
+                .last()
+                .unwrap()
+                .split(":")
+                .next()
+                .unwrap()
+                .trim_left_matches(" ");
+
+            let approvals_dirname = "approvals";
+            let approvals_dir = Path::new(approvals_dirname);
+            if !approvals_dir.exists() {
+                match fs::create_dir(approvals_dir) {
+                    Err(err) => panic!("Failed to create directory for approvals data: {:?}", err),
                     _ => {}
                 }
-            } else if !expected_dir.is_dir() {
-                panic!("Directory for expected data is not a directory")
+            } else if !approvals_dir.is_dir() {
+                panic!("Path for approvals data is not a directory")
             }
 
-            let expected_filename = format!("expected/{}.txt", stringify!($file));
+            let expected_filename = format!("{}/{}_expected.txt", approvals_dirname, method_name);
             let expected_path = Path::new(&expected_filename);
-            let mut expected_file = match File::open(expected_path) {
-                Ok(f) => f,
+            let expected = match File::open(expected_path) {
+                Ok(mut f) => {
+                    let mut data = String::with_capacity($actual.len());
+                    match f.read_to_string(&mut data) {
+                        Err(err) => panic!("Failed to read expected data: {:?}", err),
+                        _ => {}
+                    }
+                    data
+                },
                 Err(open_err) => {
                     match File::create(expected_path) {
-                        Ok(f) => f,
+                        Ok(_) => String::new(),
                         Err(create_err) => panic!("Failed to open file '{:?}'.\nOpen error: {:?}.\nCreate error: {:?}", expected_path, open_err, create_err)
                     }
                 }
             };
 
-            let mut expected = String::with_capacity($actual.len());
-            match expected_file.read_to_string(&mut expected) {
-                Err(err) => panic!("Failed to read expected data: {:?}", err),
-                _ => {}
-            }
-
             if $actual != expected {
-                let temp_dir = match TempDir::new("approvals") {
-                    Ok(d) => d,
-                    Err(err) => panic!("Failed to create temp dir: {:?}", err)
-                };
-
-                let actual_path = temp_dir.path().join(Path::new("actual.txt"));
-                let mut actual_file = match File::create(actual_path.clone()) {
+                let actual_filename = format!("{}/{}_actual.txt", approvals_dirname, method_name);
+                let mut actual_file = match File::create(actual_filename.clone()) {
                     Ok(f) => f,
                     Err(err) => panic!("Failed to create temp file: {:?}", err)
                 };
@@ -75,7 +71,7 @@ macro_rules! approve_file {
                 let diff_tool = "opendiff"; // FIXME: Configure
 
                 let output = Command::new(diff_tool)
-                    .arg(actual_path.as_os_str())
+                    .arg(::std::ffi::OsStr::new(actual_filename.as_str()))
                     .arg(expected_path.as_os_str())
                     .output();
 
@@ -83,6 +79,8 @@ macro_rules! approve_file {
                     Err(err) => panic!("Failed to launch diff tool '{}': {:?}", diff_tool, err),
                     _ => {}
                 }
+
+                fs::remove_file(actual_filename);
 
                 panic!("strings are not equal")
             }
