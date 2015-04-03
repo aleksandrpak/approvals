@@ -47,7 +47,7 @@ macro_rules! approve {
                         _ => {}
                     }
 
-                    data.trim_right_matches("\n").to_string() // Removing LF in the end
+                    data
                 },
                 Err(open_err) => {
                     match File::create(expected_path) {
@@ -57,7 +57,7 @@ macro_rules! approve {
                 }
             };
 
-            if $actual != expected {
+            if $actual.trim_right_matches("\n") != expected.trim_right_matches("\n") {
                 let actual_filename = format!("{}/{}_actual.txt", approvals_dirname, method_name);
                 let mut actual_file = match File::create(actual_filename.clone()) {
                     Ok(f) => f,
