@@ -24,7 +24,7 @@ macro_rules! approve {
                 .split(":")
                 .next()
                 .unwrap()
-                .trim_left_matches(" ");
+                .trim_left_matches(" "); // FIXME: Handle all results/options
 
             let approvals_dirname = "approvals";
             let approvals_dir = Path::new(approvals_dirname);
@@ -46,7 +46,8 @@ macro_rules! approve {
                         Err(err) => panic!("Failed to read expected data: {:?}", err),
                         _ => {}
                     }
-                    data
+
+                    data.trim_right_matches("\n").to_string() // Removing LF in the end
                 },
                 Err(open_err) => {
                     match File::create(expected_path) {
@@ -68,12 +69,15 @@ macro_rules! approve {
                     _ => {}
                 }
 
-                let diff_tool = "opendiff"; // FIXME: Configure
+                let diff_tool = "vimdiff"; // FIXME: Configure
 
-                let output = Command::new(diff_tool)
-                    .arg(::std::ffi::OsStr::new(actual_filename.as_str()))
+                let output = match
+                    Command::new(diff_tool).arg(::std::ffi::OsStr::new(actual_filename.as_str()))
                     .arg(expected_path.as_os_str())
-                    .output();
+                    .spawn() {
+                    Ok(p) => p.wait_with_output(),
+                    Err(err) => panic!("Failed to launch diff tool '{}': {:?}", diff_tool, err)
+                };
 
                 match output {
                     Err(err) => panic!("Failed to launch diff tool '{}': {:?}", diff_tool, err),
