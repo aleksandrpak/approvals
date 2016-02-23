@@ -3,7 +3,6 @@ use std::fmt;
 
 extern crate backtrace;
 
-#[derive(Debug)]
 pub enum Error {
     InvalidLevel,
     NoSymbolName,
