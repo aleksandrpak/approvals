@@ -61,7 +61,7 @@ fn resolve_method(symbol: &backtrace::Symbol, level: usize) -> Result<String, Er
     try!(backtrace::demangle(&mut demangled, mangled));
 
     let index = try!(demangled.rfind(':').ok_or(Error::NoMethodSeparator));
-    let method_name = try!(str::from_utf8(&(demangled.as_bytes())[0..(index - 1)]));
+    let method_name = try!(str::from_utf8(&(demangled.as_bytes())[..(index - 1)]));
 
     Ok(method_name.to_string())
 }
