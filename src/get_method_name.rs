@@ -1,7 +1,7 @@
-use std::str;
-use std::fmt;
-
 extern crate backtrace;
+
+use std::fmt;
+use std::str;
 
 pub enum Error {
     InvalidLevel,
