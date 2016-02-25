@@ -1,6 +1,6 @@
 [package]
 name = "approvals"
-version = "0.0.5"
+version = "0.0.6"
 authors = ["alekspak <alekspak@icloud.com>"]
 
 description = "A simple library allowing to compare strings in unit-tests. Currently in development stage and not usable."
@@ -12,7 +12,6 @@ repository = "https://github.com/aleksandrpak/approvals"
 license = "MIT"
 
 exclude = [
-    "src/approvals_test/*",
     "build.sh",
 ]
 
