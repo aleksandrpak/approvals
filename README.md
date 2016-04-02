@@ -1,3 +1,3 @@
 # approvals
 
-Usage: approvals::approve("actual string received from test");
+Usage: ```approvals::approve("actual string received from test");```
