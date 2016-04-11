@@ -1,4 +1,4 @@
-# approvals
+# approvals [![Build Status](https://travis-ci.org/aleksandrpak/approvals.svg)](https://travis-ci.org/aleksandrpak/approvals)
 
 Library that allows to write simple text related tests like producing JSON. 
 
