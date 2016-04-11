@@ -20,7 +20,7 @@ pub fn test_get_method_name_invalid_level() {
 pub fn test_get_method_name_no_method_separator() {
     match method_name::get(3) {
         Err(Error::NoMethodSeparator) => {}
-        Err(err) => panic!("Expected invalid level but was error: {:?}", err),
-        Ok(ok) => panic!("Expected invalid level but was ok: {}", ok),
+        Err(err) => panic!("Expected no method separator but was error: {:?}", err),
+        Ok(ok) => panic!("Expected no method separator but was ok: {}", ok),
     }
 }
