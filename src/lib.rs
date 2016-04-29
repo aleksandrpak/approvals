@@ -14,7 +14,7 @@ pub fn approve(actual: &str) {
     let dir_path = get_dir_path(approvals_dir);
     let contents = get_file_contents(&method_name, dir_path);
 
-    if actual.trim_right_matches("\n") == contents.trim_right_matches("\n") {
+    if actual.trim_right_matches('\n') == contents.trim_right_matches('\n') {
         return;
     }
 

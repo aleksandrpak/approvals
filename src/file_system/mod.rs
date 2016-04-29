@@ -9,9 +9,8 @@ pub fn get_dir_path(dir_name: &str) -> &Path {
     let path = Path::new(dir_name);
 
     if !path.exists() {
-        match fs::create_dir(path) {
-            Err(err) => panic!("Failed to create directory for approvals data: {}", err),
-            _ => {}
+        if let Err(err) = fs::create_dir(path) {
+            panic!("Failed to create directory for approvals data: {}", err)
         }
     } else if !path.is_dir() {
         panic!("Approvals path is not a directory");
@@ -54,8 +53,7 @@ pub fn write_actual(actual: &str, method_name: &str, dir_path: &Path) {
         Err(err) => panic!("Failed to create file for actual value: {}", err),
     };
 
-    match file.write_all(&actual.as_bytes()) {
-        Err(err) => panic!("Failed to write actual value to file: {}", err),
-        _ => {}
+    if let Err(err) = file.write_all(&actual.as_bytes()) {
+        panic!("Failed to write actual value to file: {}", err)
     }
 }
